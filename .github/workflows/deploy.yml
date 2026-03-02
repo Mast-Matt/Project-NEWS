@@ -35,15 +35,36 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build -- --configuration production --base-href /Project-NEWS/ --output-path dist/Project-NEWS
+        run: npm run build -- --configuration production --base-href /${{ github.event.repository.name }}/ --output-path dist/${{ github.event.repository.name }}
 
-      - name: Add SPA fallback for GitHub Pages
-        run: cp dist/Project-NEWS/browser/index.html dist/Project-NEWS/browser/404.html
+      - name: Resolve deploy directory
+        id: resolve
+        shell: bash
+        run: |
+          REPO_DIR="dist/${{ github.event.repository.name }}"
+          if [ -f "$REPO_DIR/browser/index.html" ]; then
+            OUT_DIR="$REPO_DIR/browser"
+          elif [ -f "$REPO_DIR/index.html" ]; then
+            OUT_DIR="$REPO_DIR"
+          else
+            OUT_DIR="$(find dist -type f -name index.html -printf '%h\n' | head -n 1)"
+          fi
+
+          if [ -z "$OUT_DIR" ] || [ ! -f "$OUT_DIR/index.html" ]; then
+            echo "Could not find built index.html under dist/."
+            find dist -maxdepth 4 -type f | sort
+            exit 1
+          fi
+
+          echo "Resolved deploy directory: $OUT_DIR"
+          ls -la "$OUT_DIR"
+          cp "$OUT_DIR/index.html" "$OUT_DIR/404.html"
+          echo "out_dir=$OUT_DIR" >> "$GITHUB_OUTPUT"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist/Project-NEWS/browser
+          path: ${{ steps.resolve.outputs.out_dir }}
 
   deploy:
     environment:
