@@ -1,0 +1,305 @@
+<div class="news-container">
+  <!-- Language Toggle -->
+  <div class="language-toggle">
+    <button 
+      class="lang-btn" 
+      [class.active]="currentLanguage() === 'en'"
+      (click)="setLanguage('en')"
+    >
+      English
+    </button>
+    <button 
+      class="lang-btn" 
+      [class.active]="currentLanguage() === 'vi'"
+      (click)="setLanguage('vi')"
+    >
+      Tiếng Việt
+    </button>
+  </div>
+
+  <!-- Header Section -->
+  <div class="header">
+    <h1>{{ translationService.t('title') }}</h1>
+    <p class="subtitle">{{ translationService.t('subtitle') }}</p>
+  </div>
+
+  <!-- Info Section -->
+  <div class="info-section" [class.collapsed]="!showInfo()">
+    <button class="toggle-btn" (click)="showInfo.set(!showInfo())">
+      {{ showInfo() ? '▼' : '▶' }} {{ translationService.t('what-is-news') }}
+    </button>
+    <div class="info-content" *ngIf="showInfo()">
+      <div class="info-box">
+        <h3>{{ translationService.t('about-news') }}</h3>
+        <p>
+          {{ translationService.t('description') }}
+        </p>
+        <h4>{{ translationService.t('when-to-use') }}</h4>
+        <ul>
+          <li>{{ translationService.t('use-1') }}</li>
+          <li>{{ translationService.t('use-2') }}</li>
+          <li>{{ translationService.t('use-3') }}</li>
+          <li>{{ translationService.t('use-4') }}</li>
+        </ul>
+      </div>
+
+      <div class="parameters-guide">
+        <h3>{{ translationService.t('parameter-guidelines') }}</h3>
+        <div class="guide-item">
+          {{ translationService.t('respiratory-rate-guide') }}
+        </div>
+        <div class="guide-item">
+          {{ translationService.t('oxygen-sat-guide') }}
+        </div>
+        <div class="guide-item">
+          {{ translationService.t('temperature-guide') }}
+        </div>
+        <div class="guide-item">
+          {{ translationService.t('systolic-bp-guide') }}
+        </div>
+        <div class="guide-item">
+          {{ translationService.t('heart-rate-guide') }}
+        </div>
+        <div class="guide-item">
+          <strong>{{ translationService.t('acvpu-guide') }}</strong>
+          <ul>
+            <li>{{ translationService.t('alert') }}</li>
+            <li>{{ translationService.t('confused') }}</li>
+            <li>{{ translationService.t('verbal') }}</li>
+            <li>{{ translationService.t('pain') }}</li>
+            <li>{{ translationService.t('unresponsive') }}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input Form Section -->
+  <div class="form-section">
+    <h2>{{ translationService.t('enter-vital-signs') }}</h2>
+    
+    <div class="input-grid">
+      <!-- Respiratory Rate -->
+      <div class="input-group">
+        <label for="respiratory-rate">{{ translationService.t('respiratory-rate') }}</label>
+        <input 
+          id="respiratory-rate"
+          type="number" 
+          min="0" 
+          max="50"
+          [value]="parameters().respiratoryRate"
+          (change)="updateParameter('respiratoryRate', +$any($event.target).value)"
+          class="form-input"
+        />
+        <small class="score-display">
+          {{ translationService.t('score') }}: <strong>{{ scores()?.respiratoryRate }}</strong>
+        </small>
+      </div>
+
+      <!-- Oxygen Saturation -->
+      <div class="input-group">
+        <label for="oxygen-sat">{{ translationService.t('oxygen-saturation') }}</label>
+        <input 
+          id="oxygen-sat"
+          type="number" 
+          min="0" 
+          max="100"
+          [value]="parameters().oxygenSaturation"
+          (change)="updateParameter('oxygenSaturation', +$any($event.target).value)"
+          class="form-input"
+        />
+        <small class="score-display">
+          {{ translationService.t('score') }}: <strong>{{ scores()?.oxygenSaturation }}</strong>
+        </small>
+      </div>
+
+      <!-- Temperature -->
+      <div class="input-group">
+        <label for="temperature">{{ translationService.t('temperature') }}</label>
+        <input 
+          id="temperature"
+          type="number" 
+          min="30" 
+          max="45"
+          step="0.1"
+          [value]="parameters().temperature"
+          (change)="updateParameter('temperature', +$any($event.target).value)"
+          class="form-input"
+        />
+        <small class="score-display">
+          {{ translationService.t('score') }}: <strong>{{ scores()?.temperature }}</strong>
+        </small>
+      </div>
+
+      <!-- Systolic BP -->
+      <div class="input-group">
+        <label for="systolic-bp">{{ translationService.t('systolic-bp') }}</label>
+        <input 
+          id="systolic-bp"
+          type="number" 
+          min="0" 
+          max="300"
+          [value]="parameters().systolicBP"
+          (change)="updateParameter('systolicBP', +$any($event.target).value)"
+          class="form-input"
+        />
+        <small class="score-display">
+          {{ translationService.t('score') }}: <strong>{{ scores()?.systolicBP }}</strong>
+        </small>
+      </div>
+
+      <!-- Heart Rate -->
+      <div class="input-group">
+        <label for="heart-rate">{{ translationService.t('heart-rate') }}</label>
+        <input 
+          id="heart-rate"
+          type="number" 
+          min="0" 
+          max="200"
+          [value]="parameters().heartRate"
+          (change)="updateParameter('heartRate', +$any($event.target).value)"
+          class="form-input"
+        />
+        <small class="score-display">
+          {{ translationService.t('score') }}: <strong>{{ scores()?.heartRate }}</strong>
+        </small>
+      </div>
+
+      <!-- ACVPU -->
+      <div class="input-group">
+        <label for="acvpu">{{ translationService.t('consciousness') }}</label>
+        <select 
+          id="acvpu"
+          [value]="parameters().acvpu"
+          (change)="updateACVPU($any($event.target).value)"
+          class="form-input"
+        >
+          <option *ngFor="let option of acvpuOptions" [value]="option">
+            {{ option }}
+          </option>
+        </select>
+        <small class="score-display">
+          {{ translationService.t('score') }}: <strong>{{ scores()?.consciousness }}</strong>
+        </small>
+      </div>
+
+      <!-- Supplemental Oxygen -->
+      <div class="input-group checkbox-group">
+        <label>
+          <input 
+            type="checkbox"
+            [checked]="parameters().supplementalOxygen"
+            (change)="updateSupplementalOxygen($any($event.target).checked)"
+            class="checkbox-input"
+          />
+          <span>{{ translationService.t('supplemental-oxygen') }}</span>
+        </label>
+        <small class="score-display">
+          {{ translationService.t('score') }}: <strong>{{ scores()?.supplementalOxygen }}</strong>
+        </small>
+      </div>
+
+      <!-- Oxygen Saturation Scale Selection -->
+      <div class="input-group">
+        <label for="oxygen-scale">{{ translationService.t('oxygen-scale') }}</label>
+        <select 
+          id="oxygen-scale"
+          [value]="parameters().oxygenScaleType"
+          (change)="updateOxygenScaleType($any($event.target).value)"
+          class="form-input"
+        >
+          <option value="scale1">{{ translationService.t('scale-1') }}</option>
+          <option value="scale2">{{ translationService.t('scale-2') }}</option>
+        </select>
+        <small class="scale-notice">
+          {{ translationService.t('hypercapnic-notice') }}
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Section -->
+  <div 
+    class="results-section" 
+    *ngIf="scores()"
+    [style.background-color]="getRiskBgColor()"
+    [style.border-color]="getRiskColor()"
+  >
+    <div class="score-header">
+      <h2>{{ translationService.t('news-score-result') }}</h2>
+      <div class="score-display-large" [style.color]="getRiskColor()">
+        {{ scores()!.total }}/7
+      </div>
+    </div>
+
+    <div class="risk-level" [style.color]="getRiskColor()">
+      <h3>{{ translationService.t('risk-level') }}: {{ scores()!.riskLevel | uppercase }}</h3>
+    </div>
+
+    <div class="score-breakdown">
+      <h4>{{ translationService.t('score-breakdown') }}:</h4>
+      <table class="scores-table">
+        <tbody>
+          <tr>
+            <td>{{ translationService.t('respiratory-rate') }}</td>
+            <td class="score-value">{{ scores()!.respiratoryRate }}</td>
+          </tr>
+          <tr>
+            <td>{{ translationService.t('oxygen-saturation') }}</td>
+            <td class="score-value">{{ scores()!.oxygenSaturation }}</td>
+          </tr>
+          <tr>
+            <td>{{ translationService.t('temperature') }}</td>
+            <td class="score-value">{{ scores()!.temperature }}</td>
+          </tr>
+          <tr>
+            <td>{{ translationService.t('systolic-bp') }}</td>
+            <td class="score-value">{{ scores()!.systolicBP }}</td>
+          </tr>
+          <tr>
+            <td>{{ translationService.t('heart-rate') }}</td>
+            <td class="score-value">{{ scores()!.heartRate }}</td>
+          </tr>
+          <tr>
+            <td>{{ translationService.t('consciousness') }}</td>
+            <td class="score-value">{{ scores()!.consciousness }}</td>
+          </tr>
+          <tr>
+            <td>{{ translationService.t('supplemental-oxygen') }}</td>
+            <td class="score-value">{{ scores()!.supplementalOxygen }}</td>
+          </tr>
+          <tr class="total-row">
+            <td><strong>{{ translationService.t('total') }}</strong></td>
+            <td class="score-value"><strong>{{ scores()!.total }}</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="recommendation">
+      <h4>{{ translationService.t('clinical-recommendation') }}</h4>
+      <p>{{ translationService.t(getRecommendationKey()) }}</p>
+    </div>
+
+    <!-- Risk Level Guide -->
+    <div class="risk-guide">
+      <h4>{{ translationService.t('risk-guidelines') }}</h4>
+      <div class="risk-item low">
+        {{ translationService.t('low-risk') }}
+      </div>
+      <div class="risk-item medium">
+        {{ translationService.t('medium-risk') }}
+      </div>
+      <div class="risk-item high">
+        {{ translationService.t('high-risk') }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p><small>
+      {{ translationService.t('footer') }}
+    </small></p>
+  </div>
+</div>
